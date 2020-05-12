@@ -77,8 +77,8 @@ cv_data <- pivot_longer(merged,
   mutate(rate = cases / population * 10^6)
 
 cv_summary <- function(d, country_list = "World",
-                       plot = TRUE, facet = "country",
-                       status = c("confirmed", "deaths", "recovered")) {
+                                  plot = TRUE, facet = "country",
+                                  status = c("confirmed", "deaths", "recovered")) {
   
   # based on `wes_palettes()` GrandBudapest1, IsleofDogs1, IsleofDogs2
   # from the {wesanderson} package
@@ -221,18 +221,26 @@ cv_summary(cv_data)
 #plus China, Russia, and Iran. Facet your plots first by “country” and then 
 #by “variable”.
 
-cv_summary(cv_data, facet = "country")
-cv_summary(cv_data, facet = "variable")
+cv_summary(cv_data, facet = "country", country_list = c("Russia", "China", "US", "United
+                                                        Kingdom", "Canada", "France", 
+                                                        "Germany", "Italy", "Japan", "Iran"))
+cv_summary(cv_data, facet = "variable", country_list = c("Russia", "China", "US", "United
+                                                        Kingdom", "Canada", "France", 
+                                                         "Germany", "Italy", "Japan", "Iran"))
 
 #Challenge 3
 #Use the dataset and function generated above to return summary data for ALL 
 #countries in the dataset, and then filter this returned dataset to only those 
 #countries with populations of over 1 million, storing this dataset as a tibble d. 
 #How many countries does this tibble include?
+results <- cv_summary(cv_data, country_list = "All")
+results$cum_cases_plot
+results$daily_cases_plot
+data <- results$total
 
-d <- cv_summary(cv_data, plot = FALSE) %>%
-  select(country, population)
-
+d <- filter(data, population > 1000000)
+d
+nrow(d)/6
 
 #Challenge 4
 #Filter d to generate two additional tibbles, overall and daily that include only 
@@ -242,6 +250,9 @@ d <- cv_summary(cv_data, plot = FALSE) %>%
 #recorded per million people in the population. Which 10 countries have experienced 
 #the highest over rate of confirmed cases? Which 10 countries have experienced the 
 #highest single-day rate of confirmed cases?
+
+overall <- filter(d, variable == "confirmed")
+daily <- filter(d, variable == "daily_confirmed")
 
 
 #Challenge 5
@@ -254,7 +265,7 @@ d <- cv_summary(cv_data, plot = FALSE) %>%
 #Based on the full model, what predictors variables have slopes significantly 
 #different from zero?
 
-lm(rate ~ density + population + gdp_capita + income, data = cv_data, plot = )
+lm(rate ~ density + population + gdp_capita + income, data = cv_data)
 
 ggplot(data = cv_data, aes(x = rate, y = density, z = population)) +
   geom_point() +
@@ -267,7 +278,6 @@ ggplot(data = cv_data, aes(x = density, y = gdp_capita, z = income)) +
 ggplot(data = cv_data, aes(x = income, y = rate, z = gdp_capita)) +
   geom_point() +
   geom_smooth(method = "lm", se = FALSE)
-
 
 #Challenge 6
 #Run stepwise selection using AIC to evaluate whether the full model or a nested, 
